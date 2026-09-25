@@ -822,6 +822,13 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
     var find = '', found = null;
     var theta = 0.45, phi = 0.22, zoom = 1.0, dragging = false, moved = 0,
         lastX = 0, lastY = 0;
+    // The point a TAP selected, which outlives the pointer. On touch the
+    // browser fires pointerleave the instant the finger lifts —
+    // measured order for one tap: pointerdown, pointerup, pointerout,
+    // pointerleave, click — so a leave handler that resets to idle wipes the
+    // readout the tap just set, and the figure looks dead to every phone user.
+    // Fig. 1 never had this bug because its say() renders its own `picked`.
+    var picked = -1;
     // This figure had no auto-spin at all until 2026-09-25 — Fig. 1 span and it
     // did not, which reads as "the job map is broken" rather than as a
     // deliberate difference (Matthew: "the 3d market phate is not rotating?").
@@ -1243,7 +1250,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       // point", so the figure holds still and the tapped point is selected; a
       // drag was a re-aim, so it carries on spinning from the new angle.
       if (moved >= 4) { resumeSpin(); return; }
-      hot = pickAt(e); say(hot); draw();
+      picked = pickAt(e); hot = picked; say(hot); draw();
     });
     canvas.addEventListener('pointercancel', function () {
       dragging = false; resumeSpin();
@@ -1264,7 +1271,8 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
     });
     canvas.addEventListener('pointerleave', function () {
       if (dragging) return;
-      hot = -1; say(-1); draw();
+      // NOT `say(-1)`: on touch this fires straight after every tap.
+      hot = picked; say(hot); draw();
     });
     canvas.addEventListener('wheel', function (e) {
       // Plain wheel zooms here too; see Fig. 1's note on the scroll trade-off.
@@ -1273,18 +1281,18 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       draw();
     }, { passive: false });
     canvas.addEventListener('dblclick', function () {
-      theta = 0.45; phi = 0.22; zoom = 1.0; draw();
+      theta = 0.45; phi = 0.22; zoom = 1.0; picked = -1; hot = -1; say(-1); draw();
       resumeSpin();                 // double-click IS a reset, so it restarts too
     });
     if (modeSel) modeSel.addEventListener('change', function () {
-      hot = -1; syncKey(); say(-1); draw();
+      picked = -1; hot = -1; syncKey(); say(-1); draw();
     });
     if (skillSel) skillSel.addEventListener('change', function () {
-      hot = -1; syncKey(); say(-1); draw();
+      picked = -1; hot = -1; syncKey(); say(-1); draw();
     });
     zoomButtons('ctl-jobs', function (z) {
       if (z === null) {
-        theta = 0.45; phi = 0.22; zoom = 1.0; hot = -1; say(-1);
+        theta = 0.45; phi = 0.22; zoom = 1.0; picked = -1; hot = -1; say(-1);
         resumeSpin();
       } else { zoom = z(zoom); }
       draw();
