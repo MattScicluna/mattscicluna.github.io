@@ -1213,18 +1213,37 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       if (isS && data && note) writeSkillStats(note, cooc);
     }
 
+    // Hit test, shared by hover and by tap. A touch device never hovers, so
+    // without the tap path the readout was unreachable on a phone: pointerdown
+    // clears it and pointermove only fires while dragging (Matthew, 2026-09-25:
+    // "when i click a dot i dont see the job info now? on mobile").
+    // The 13px radius is generous on purpose — it is a fingertip, not a cursor.
+    function pickAt(e) {
+      var g = fit(canvas), rect = canvas.getBoundingClientRect();
+      var mx = (e.clientX - rect.left) * g.dpr, my = (e.clientY - rect.top) * g.dpr;
+      var best = -1, bestD = (13 * g.dpr) * (13 * g.dpr);
+      for (var i = 0; i < screen.length; i++) {
+        var dx = screen[i].sx - mx, dy = screen[i].sy - my, d2 = dx * dx + dy * dy;
+        // ties go to the nearer point, which is the one you can see
+        if (d2 < bestD || (d2 === bestD && best >= 0 && screen[i].z < screen[best].z)) {
+          bestD = d2; best = i;
+        }
+      }
+      return best;
+    }
+
     canvas.addEventListener('pointerdown', function (e) {
       dragging = true; moved = 0; spinning = false; hot = -1; say(-1);
       lastX = e.clientX; lastY = e.clientY;
       canvas.setPointerCapture(e.pointerId);
     });
-    canvas.addEventListener('pointerup', function () {
+    canvas.addEventListener('pointerup', function (e) {
       dragging = false;
       // Same click-vs-drag rule as Fig. 1: a tap means "I am reading this
-      // point", so the figure holds still; a drag was a re-aim, so it carries
-      // on spinning from the new angle. This figure has no click-to-select, so
-      // `moved` exists only to tell the two gestures apart.
-      if (moved >= 4) resumeSpin();
+      // point", so the figure holds still and the tapped point is selected; a
+      // drag was a re-aim, so it carries on spinning from the new angle.
+      if (moved >= 4) { resumeSpin(); return; }
+      hot = pickAt(e); say(hot); draw();
     });
     canvas.addEventListener('pointercancel', function () {
       dragging = false; resumeSpin();
@@ -1239,16 +1258,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
         draw();
         return;
       }
-      var g = fit(canvas), rect = canvas.getBoundingClientRect();
-      var mx = (e.clientX - rect.left) * g.dpr, my = (e.clientY - rect.top) * g.dpr;
-      var best = -1, bestD = (13 * g.dpr) * (13 * g.dpr);
-      for (var i = 0; i < screen.length; i++) {
-        var dx = screen[i].sx - mx, dy = screen[i].sy - my, d2 = dx * dx + dy * dy;
-        // ties go to the nearer point, which is the one you can see
-        if (d2 < bestD || (d2 === bestD && best >= 0 && screen[i].z < screen[best].z)) {
-          bestD = d2; best = i;
-        }
-      }
+      var best = pickAt(e);
       if (best === hot) return;
       hot = best; say(hot); draw();
     });
