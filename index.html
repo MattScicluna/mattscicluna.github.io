@@ -404,14 +404,14 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
   <h2>I&rsquo;m on the job market</h2>
   <div class="prose">
     <p>I am looking for a research scientist or machine-learning scientist role in genomics, drug discovery, or biology more broadly. I am particularly interested in opportunities where I can draw on my biological, statistical, and computational background to help improve human health.</p>
-    <p>To better understand the range of roles available, I collected online job postings and analyzed them using PHATE. The visualization below reveals several clusters of related positions. I also asked GPT&#8209;5.6&#8209;Terra to compare my CV with each posting, providing a score out of&nbsp;18 of how closely my experience aligns with each role.</p>
+    <p>To better understand the range of roles available, I collected online job postings and analyzed them using PHATE. The visualization below reveals several clusters of related positions. I also asked GPT&#8209;5.6&#8209;Terra to compare my CV with each posting. Hovering a role reports where it falls among every posting it scored, as a percentile: the raw scale it works on says little on its own, since the typical posting sits near the middle of it and only a handful of roles approach either end.</p>
     <p>I have recently submitted several applications, so you may have arrived here after receiving my r&eacute;sum&eacute;. Feel free to interact with the PHATE plot below &mdash; you might even find your own job posting.</p>
   </div>
     <div class="modebar">
       <label for="jobs-mode">Colour</label>
       <select id="jobs-mode">
         <option value="cluster">text cluster</option>
-        <option value="fit">my qualification score</option>
+        <option value="fit">how closely I fit</option>
         <option value="skill">requires a skill</option>
       </select>
       <select id="jobs-skill" aria-label="Skill to highlight" hidden></select>
@@ -890,7 +890,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
     }
     function idle() {
       if (isSkill()) return 'Hover a point to read the role and whether it asks for this.';
-      return isFit() ? 'Hover a point to read the role and how it scores.'
+      return isFit() ? 'Hover a point to read the role and where it ranks.'
                      : 'Hover a point to read its cluster.';
     }
 
@@ -1085,11 +1085,11 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
         return;
       }
       if (isFit()) {
-        // the number carries its own value's colour, so it reads off the bar
+        // the rank carries its own score's colour, so it reads off the bar
         out.innerHTML = q.qual < 0
           ? '<b style="color:var(--ink-faint)">not scored</b> &mdash; ' + esc(role)
-          : '<b style="color:' + ramp(q.qual / data.qual_max) + '">' + q.qual +
-            ' / ' + data.qual_max + '</b> &mdash; ' + esc(role) +
+          : '<b style="color:' + ramp(q.qual / data.qual_max) + '">' +
+            ordinal(fitPercentile(q.qual)) + ' percentile</b> &mdash; ' + esc(role) +
             (q.n > 1 ? ' <em>(+ ' + (q.n - 1) + ' near-identical postings)</em>' : '');
         return;
       }
@@ -1108,6 +1108,51 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    // Where a score sits among the postings that were scored, shown INSTEAD of
+    // the raw number (Matthew, 2026-09-26). A bare "13 / 18" reads as 72% to
+    // anyone who has not seen the spread, when the median scored posting is 4
+    // and only 6 of 1,080 reach 18 -- so the raw scale understates a strong
+    // match to exactly the reader this section is written for. The colour ramp
+    // still encodes the raw score, so the picture keeps its true magnitudes and
+    // only the label changes.
+    //
+    // Mid-rank: everything strictly below, plus half of this value's own ties.
+    // That is the standard percentile-rank definition, and it is also why the
+    // lowest score does not render as "0th" -- a value shared by hundreds of
+    // postings lands mid-pack rather than on the floor.
+    //
+    // Derived in the browser from the `qual` array that already ships. No
+    // build-side step, so a payload refresh cannot leave the two disagreeing.
+    var pctByScore = null;
+    function fitPercentile(v) {
+      if (pctByScore === null) {
+        var counts = {}, n = 0, i, q;
+        for (i = 0; i < data.qual.length; i++) {
+          q = data.qual[i];
+          if (q < 0) continue;              // unscored: no rank to report
+          counts[q] = (counts[q] || 0) + 1;
+          n++;
+        }
+        var vals = Object.keys(counts).map(Number).sort(function (a, b) { return a - b; });
+        var below = 0;
+        pctByScore = {};
+        for (i = 0; i < vals.length; i++) {
+          pctByScore[vals[i]] = n ? (below + counts[vals[i]] / 2) / n : 0;
+          below += counts[vals[i]];
+        }
+      }
+      // Clamped at both ends: "0th" and "100th" each claim more than a rank
+      // can: nothing ranks below everything, or above everything, including
+      // the postings tied with it.
+      return Math.max(1, Math.min(99, Math.round((pctByScore[v] || 0) * 100)));
+    }
+
+    function ordinal(n) {
+      var t = n % 100;
+      if (t >= 11 && t <= 13) return n + 'th';
+      return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+    }
+
     function buildKey() {
       var key = document.getElementById('jobs-legend');
       if (!key || key.childElementCount) return;
@@ -1116,10 +1161,13 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       }
       var bar = document.createElement('span');
       bar.className = 'bar';
-      key.appendChild(span('0'));
+      // Word labels, not numbers: the bar encodes the raw score while the
+      // hover reports a percentile, and the two are not linearly related, so
+      // numbering the ends would misdescribe one of them.
+      key.appendChild(span('weaker'));
       key.appendChild(bar);
-      key.appendChild(span(data.qual_max));
-      key.appendChild(span('qualification score ·'));
+      key.appendChild(span('stronger'));
+      key.appendChild(span('fit ·'));
       var grey = document.createElement('span');
       grey.style.display = 'inline-flex';
       grey.style.alignItems = 'center';
