@@ -438,7 +438,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       <p class="cards-note" id="jobs-skillnote" hidden></p>
       <p class="cards-note cooc" id="jobs-cooc" hidden></p>
       <div class="rampkey" id="jobs-legend" hidden></div>
-      <figcaption><span class="fig">Fig.&nbsp;2</span> &mdash; 3&#8209;D PHATE of job postings, deduplicated to <em>N</em>&nbsp;=&nbsp;2,559 distinct texts, from a phrase&#8209;merged TF&#8209;IDF&nbsp;&rarr;&nbsp;centered SVD&#8209;50 representation (<code>knn&nbsp;=&nbsp;10</code>, <code>t&nbsp;=&nbsp;10</code>). Axes are shown at true aspect. The eight largest families come from HDBSCAN on a separate 10&#8209;component UMAP of the same vectors, each named by the terms that most distinguish it from the rest of the corpus. It spins on its own: <strong>clicking stops the spin</strong> so you can read a point, <strong>dragging rotates it</strong> and leaves the spin running, and reset starts it again. <strong>Drag to rotate</strong>, scroll or use the buttons to zoom, double&#8209;click to reset; hover a point for the role, or search to highlight roles without changing the colouring.</figcaption>
+      <figcaption><span class="fig">Fig.&nbsp;2</span> &mdash; 3&#8209;D PHATE of job postings, deduplicated to <em>N</em>&nbsp;=&nbsp;<span id="jobs-n">&mdash;</span> distinct texts, from <code>all&#8209;MiniLM&#8209;L6&#8209;v2</code> sentence embeddings (384&#8209;d, mean&#8209;centred and L2&#8209;normalised) (<code>knn&nbsp;=&nbsp;10</code>, <code>t&nbsp;=&nbsp;5</code>). Axes are shown at true aspect. The eight largest families come from HDBSCAN on a separate 10&#8209;component UMAP of the same vectors, each named by the terms that most distinguish it from the rest of the corpus. It spins on its own: <strong>clicking stops the spin</strong> so you can read a point, <strong>dragging rotates it</strong> and leaves the spin running, and reset starts it again. <strong>Drag to rotate</strong>, scroll or use the buttons to zoom, double&#8209;click to reset; hover a point for the role, or search to highlight roles without changing the colouring.</figcaption>
     </figure>
 </section>
 
@@ -1253,6 +1253,12 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
 
     MarketMap.load('data-jobs', function (d) {
       data = d;
+      // N comes from the payload, never from the prose: this caption sat
+      // at 2,559 texts and "phrase-merged TF-IDF" for two days after the
+      // figure moved to MiniLM, so the method line contradicted the plot
+      // it described (2026-09-27).
+      var nEl = document.getElementById('jobs-n');
+      if (nEl) nEl.textContent = d.points.length.toLocaleString('en-US');
       var grid = document.getElementById('jobs-cards');
       if (grid) {
         d.cards.forEach(function (c, i) {
