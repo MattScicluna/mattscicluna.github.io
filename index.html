@@ -27,13 +27,13 @@
   --serif: 'Crimson Pro', 'Cochineal', Georgia, serif;
   --sans: 'Cabin', 'Trebuchet MS', system-ui, sans-serif;
   --mono: 'Inconsolata', ui-monospace, monospace;
-  --ord-1: #86b6ef; --ord-2: #5598e7; --ord-3: #2a78d6;
-  --ord-4: #1c5cab; --ord-5: #104281;
+  --fit-1: #a9b1bd; --fit-2: #8599bd; --fit-3: #5478c0;
+  --fit-4: #2d5db0; --fit-5: #124285;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-  --ord-1: #184f95; --ord-2: #256abf; --ord-3: #3987e5;
-  --ord-4: #6da7ec; --ord-5: #9ec5f4;
+  --fit-1: #c6cbd4; --fit-2: #9aaecb; --fit-3: #6f90cb;
+  --fit-4: #4673ce; --fit-5: #2a5bbe;
     --paper: #17160f;
     --paper-dim: #1e1d15;
     --ink: #eae6da;
@@ -47,8 +47,8 @@
   }
 }
 :root[data-theme="light"] {
-  --ord-1: #86b6ef; --ord-2: #5598e7; --ord-3: #2a78d6;
-  --ord-4: #1c5cab; --ord-5: #104281;
+  --fit-1: #a9b1bd; --fit-2: #8599bd; --fit-3: #5478c0;
+  --fit-4: #2d5db0; --fit-5: #124285;
   --paper: #ffffff;
   --paper-dim: #f7f7f4;
   --ink: #1c1c1c;
@@ -61,8 +61,8 @@
   --swish-soft: rgba(136, 172, 11, 0.55);
 }
 :root[data-theme="dark"] {
-  --ord-1: #184f95; --ord-2: #256abf; --ord-3: #3987e5;
-  --ord-4: #6da7ec; --ord-5: #9ec5f4;
+  --fit-1: #c6cbd4; --fit-2: #9aaecb; --fit-3: #6f90cb;
+  --fit-4: #4673ce; --fit-5: #2a5bbe;
   --paper: #17160f;
   --paper-dim: #1e1d15;
   --ink: #eae6da;
@@ -228,7 +228,7 @@ figure.plot canvas:active { cursor: grabbing; }
 .rampkey .bar {
   width: 12rem; max-width: 45vw; height: 0.6rem; border-radius: 2px;
   border: 1px solid var(--line);
-  background: linear-gradient(to right, var(--ord-1), var(--ord-3), var(--ord-5));
+  background: linear-gradient(to right, var(--fit-1), var(--fit-3), var(--fit-5));
 }
 .rampkey .swatch {
   width: 0.6rem; height: 0.6rem; border-radius: 50%;
@@ -1104,15 +1104,25 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
                '#8E6FBF', '#3F9E9E', '#C4628B', '#7C8B3F'];
     var GREY = '#9aa0a6';
     // The score is continuous, so it gets ONE hue and varies only in depth:
-    // the Clawd console's --ord-1..5 blues, which invert with the theme so the
-    // high end is always the higher-contrast one. Read from CSS, not hard-coded,
-    // so the two cannot drift apart.
+    // the Clawd console's --fit-1..5 blues, read from CSS rather than
+    // hard-coded so the two cannot drift apart.
+    //
+    // The ramp runs the SAME WAY IN BOTH THEMES -- pale blue-grey at the low
+    // end, saturated blue at the high end (Matthew, 2026-09-30: "right now
+    // white is high score and blue is low score, would be better to invert
+    // it, solid blue for highest fit and white/gray for lower fit"). It used
+    // to borrow the console's --ord-1..5, which flips on dark so the high end
+    // is always the lightest step. That is right for a bar chart read against
+    // its surface and wrong here: it made a strong match the palest dot on
+    // the canvas and a weak one the bluest, so the hue said the opposite of
+    // the score. Low fit is now neutral in both themes and high fit carries
+    // the colour.
     var stops = null;
-    function ordStops() {
+    function fitStops() {
       if (stops) return stops;
       var cs = getComputedStyle(document.documentElement), o = [];
       for (var i = 1; i <= 5; i++) {
-        var m = /^#([0-9a-f]{6})$/i.exec((cs.getPropertyValue('--ord-' + i) || '').trim());
+        var m = /^#([0-9a-f]{6})$/i.exec((cs.getPropertyValue('--fit-' + i) || '').trim());
         o.push(m ? [parseInt(m[1].slice(0, 2), 16),
                     parseInt(m[1].slice(2, 4), 16),
                     parseInt(m[1].slice(4, 6), 16)] : [42, 120, 214]);
@@ -1121,7 +1131,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
       return stops;
     }
     function ramp(t) {
-      var R = ordStops();
+      var R = fitStops();
       t = Math.max(0, Math.min(1, t)) * (R.length - 1);
       var i = Math.floor(t), f = t - i;
       var a = R[i], b = R[Math.min(i + 1, R.length - 1)];
@@ -1194,8 +1204,8 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
             var st;
             if (isSkill()) {
               // One hue, present or absent — the same shape of question the
-              // score ramp answers, so it reuses the ramp's dark end rather
-              // than introducing a fourth palette.
+              // score ramp answers, so it reuses the ramp's saturated end
+              // rather than introducing a fourth palette.
               st = skillBit(data.mask[i] || 0)
                 ? { fill: ramp(0.82), alpha: 0.9, size: 2.7 }
                 : { fill: GREY, alpha: 0.18, size: 1.7 };
@@ -1204,7 +1214,11 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
               else {
                 var t = data.qual[i] / data.qual_max;
                 // size reinforces the single hue
-                st = { fill: ramp(t), alpha: 0.42 + 0.55 * t, size: 1.9 + 1.8 * t };
+                // The alpha floor drops with the ramp: now that the low end
+                // is a pale neutral rather than a dark blue, 0.42 made weak
+                // matches the loudest thing on a dark canvas. 0.30 keeps them
+                // readable and lets the saturated end carry the eye.
+                st = { fill: ramp(t), alpha: 0.30 + 0.65 * t, size: 1.9 + 1.8 * t };
               }
             } else if (data.fam[i] >= 0) {
               st = { fill: FAM[data.fam[i]], alpha: 0.92, size: 2.7 };
@@ -1568,7 +1582,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
         if (e.key === 'Escape') { findBox.value = ''; runFind(); }
       });
     }
-    // the ramp inverts with the theme, so a flip needs a repaint
+    // the ramp carries its own steps per theme, so a flip needs a repaint
     new MutationObserver(function () { stops = null; if (map) map.draw(); })
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     if (window.matchMedia) {
