@@ -357,7 +357,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
 
 <header class="site">
   <nav aria-label="Sections">
-    <a href="#market">Availability</a>
+    <a href="#market">Job landscape</a>
     <a href="#research">Research</a>
   </nav>
 </header>
@@ -401,11 +401,11 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
 </section>
 
 <section id="market">
-  <h2>Open to opportunities</h2>
+  <h2>Job landscape</h2>
   <div class="prose">
     <p>I recently joined Helix as an AI/ML Scientist, but I am always happy to hear about research or machine-learning scientist roles in genomics, drug discovery, or biology more broadly &mdash; particularly opportunities where I can draw on my biological, statistical, and computational background to help improve human health.</p>
-    <p>To better understand the range of roles available, I collected online job postings and analyzed them using PHATE. The visualization below reveals several clusters of related positions. I also asked GPT&#8209;5.6&#8209;Terra to compare my CV with each posting. Hovering a role reports where it falls among every posting it scored, as a percentile: the raw scale it works on says little on its own, since the typical posting sits near the middle of it and only a handful of roles approach either end.</p>
-    <p>I was on the job market earlier this year, so you may have arrived here after receiving my r&eacute;sum&eacute;. Feel free to interact with the PHATE plot below &mdash; you might even find your own job posting.</p>
+    <p>While I was looking for work after submitting my thesis, I collected online job postings and analyzed them using PHATE. The visualization below reveals several clusters of related positions. I also asked GPT&#8209;5.6&#8209;Terra to compare my CV with each posting. Hovering a role reports where it falls among every posting it scored, as a percentile: the raw scale it works on says little on its own, since the typical posting sits near the middle of it and only a handful of roles approach either end.</p>
+    <p>You may have arrived here after receiving my r&eacute;sum&eacute;. Feel free to interact with the PHATE plot below &mdash; you might even find your own job posting.</p>
   </div>
     <figure class="plot">
       <canvas id="plot-jobs" width="900" height="720" tabindex="0" role="img" aria-label="Rotatable three-dimensional PHATE embedding of machine-learning and computational-biology job postings, coloured by unsupervised text cluster."></canvas>
@@ -448,7 +448,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
 
     <article class="project">
       <h3><span class="bkmk"></span>Visualizing population structure at biobank scale</h3>
-      <p class="status">manuscript in preparation &mdash; available on request</p>
+      <p class="status"><a href="https://doi.org/10.64898/2026.10.29.762525">bioRxiv preprint, 2026</a></p>
       <p>How neighborhood-scale hyperparameters decide whether genuine ancestry structure &mdash; rather than sampling artifacts &mdash; appears in PHATE, t-SNE, and UMAP embeddings of population-genetic data. Shown across HGDP+1KGP, the UK&nbsp;Biobank, and <em>All&nbsp;of&nbsp;Us</em>, and validated on synthetic branching benchmarks. I led the study and its biobank analyses, built the genetics preprocessing and analysis pipeline, and contributed a scalable random-landmark PHATE implementation upstream.</p>
 
       <h4>Code</h4>
@@ -457,7 +457,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
           <div class="head">
             <span class="name"><a href="https://github.com/MattScicluna/manifold_genetics">manifold-genetics</a></span>
             <span class="role-tag">author</span>
-            <span class="ghstat">2 stars &middot; 1 fork</span>
+            <span class="ghstat">4 stars &middot; 2 forks</span>
           </div>
           <p>The genetics preprocessing and analysis pipeline behind this work: PCA, admixture estimation, and harmonization across three biobanks.</p>
         </li>
@@ -465,7 +465,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
           <div class="head">
             <span class="name"><a href="https://github.com/KrishnaswamyLab/PHATE">PHATE</a></span>
             <span class="role-tag">maintainer &middot; contributor</span>
-            <span class="ghstat">559 stars &middot; 83 forks</span>
+            <span class="ghstat">562 stars &middot; 82 forks</span>
           </div>
           <p>Manifold learning for high-dimensional biology. I contributed an optimization that made a key step roughly ten times faster, plus an out-of-sample transform and a test suite.</p>
         </li>
@@ -473,7 +473,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
           <div class="head">
             <span class="name"><a href="https://github.com/KrishnaswamyLab/graphtools">graphtools</a></span>
             <span class="role-tag">maintainer &middot; contributor</span>
-            <span class="ghstat">46 stars &middot; 17 forks</span>
+            <span class="ghstat">46 stars &middot; 18 forks</span>
           </div>
           <p>Graph construction for graph signal processing. Contributed a pynndescent backend, Numba-accelerated construction, and random landmarking.</p>
         </li>
@@ -489,7 +489,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
           <div class="head">
             <span class="name"><a href="https://github.com/latent-reasoning-works/manylatents-omics">manylatents-omics</a></span>
             <span class="role-tag">core contributor</span>
-            <span class="ghstat">6 stars &middot; 4 forks</span>
+            <span class="ghstat">7 stars &middot; 4 forks</span>
           </div>
           <p>The genomics extension: from sequence to manifold, with evaluation metrics built in.</p>
         </li>
@@ -507,7 +507,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
           <div class="head">
             <span class="name"><a href="https://github.com/HussinLab/DIETNETWORK">DIETNETWORK</a></span>
             <span class="role-tag">contributor</span>
-            <span class="ghstat">3 stars &middot; 2 forks</span>
+            <span class="ghstat">4 stars &middot; 2 forks</span>
           </div>
           <p>The model code behind the paper: the ancestry-prediction network, its training pipeline, and the attribution experiments I ran. Led by Camille Rochefort-Boulanger.</p>
         </li>
@@ -533,7 +533,7 @@ footer.site .fine + .fine { margin-top: 0.35rem; }  /* stacked lines, one gap */
     </article>
 
   </div>
-  <p class="asof">GitHub star and fork counts recorded 25 September 2026; the page is
+  <p class="asof">GitHub star and fork counts recorded 16 November 2026; the page is
   self-contained and makes no network requests, so they do not update themselves.</p>
 </section>
 
